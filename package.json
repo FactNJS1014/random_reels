@@ -1,0 +1,12 @@
+{
+  "name": "aoth-games-random",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AOTH GAMES random wheel - React + TypeScript frontend with Express + SQL Server backend",
+  "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix frontend install",
+    "db:setup": "npm --prefix backend run db:setup",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev"
+  }
+}

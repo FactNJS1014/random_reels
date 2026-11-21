@@ -1,0 +1,13 @@
+
+> aoth-games-random-backend@1.0.0 dev
+> node --watch src/server.js
+
+◇ injected env (8) from .env
+AOTH GAMES RANDOM API on http://localhost:8080
+Database target: AOTH_GAMES_RANDOM @ localhost:1433
+SQL Server connected, tables verified.
+Restarting 'src/server.js'
+◇ injected env (8) from .env
+AOTH GAMES RANDOM API on http://localhost:8080
+Database target: AOTH_GAMES_RANDOM @ localhost:1433
+SQL Server connected, tables verified.
