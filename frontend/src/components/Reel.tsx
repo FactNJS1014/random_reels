@@ -18,7 +18,21 @@ interface Track {
 }
 
 function idleTrack(numbers: string[]): Track {
-  return { items: numbers, offset: TILE_HEIGHT, targetIndex: -1, animation: null };
+  if (numbers.length === 0) {
+    return { items: [], offset: TILE_HEIGHT, targetIndex: -1, animation: null };
+  }
+
+  if (numbers.length === 1) {
+    return { items: numbers, offset: TILE_HEIGHT, targetIndex: -1, animation: null };
+  }
+
+  // Keep the order the numbers were added (never sorted) and wrap around so the
+  // last number sits directly above the first one. Each number appears only
+  // once, so nothing repeats on screen.
+  const last = numbers[numbers.length - 1];
+  const items = [last, ...numbers];
+
+  return { items, offset: 0, targetIndex: -1, animation: null };
 }
 
 export default function Reel({ numbers, spinning, winner, target, durationMs }: ReelProps) {
@@ -33,12 +47,15 @@ export default function Reel({ numbers, spinning, winner, target, durationMs }: 
     }
 
     const repeats = Math.max(6, Math.ceil(30 / numbers.length));
-    const items = [...Array.from({ length: repeats }, () => numbers).flat(), target];
-    const targetIndex = items.length - 1;
+    const cycles = repeats + 1;
+    const items = Array.from({ length: cycles }, () => numbers).flat();
+    // Land on the result inside the last full cycle, so the tile above/below it
+    // are its real neighbours (never the same number repeated next to itself).
+    const offsetInCycle = Math.max(0, numbers.indexOf(target));
+    const targetIndex = (repeats - 1) * numbers.length + offsetInCycle;
     const to = TILE_HEIGHT - targetIndex * TILE_HEIGHT;
 
-    setTrack({ items, offset: to, targetIndex, animation: { from: TILE_HEIGHT, to } });
-  }, [spinning, target, winner, numbers]);
+    setTrack({ items, offset: to, targetIndex, animation: { from: TILE_HEIGHT, to } });  }, [spinning, target, winner, numbers]);
 
   useEffect(() => {
     const element = trackRef.current;

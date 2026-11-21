@@ -6,8 +6,18 @@ const SPIN_SECONDS = 5;
 const SPIN_MS = SPIN_SECONDS * 1000;
 const DEFAULT_NUMBERS = Array.from({ length: 12 }, (_, index) => String(index + 1));
 
+function shuffle<T>(items: readonly T[]): T[] {
+  const result = [...items];
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const swap = Math.floor(Math.random() * (index + 1));
+    [result[index], result[swap]] = [result[swap], result[index]];
+  }
+  return result;
+}
+
 export default function App() {
-  const [numbers, setNumbers] = useState<string[]>(DEFAULT_NUMBERS);
+  // Start with a shuffled pool so the reel never lists 1, 2, 3, 4, ... in order.
+  const [numbers, setNumbers] = useState<string[]>(() => shuffle(DEFAULT_NUMBERS));
   const [usedNumbers, setUsedNumbers] = useState<string[]>([]);
   const [savedCount, setSavedCount] = useState<number | null>(null);
   const [input, setInput] = useState('');
@@ -22,6 +32,7 @@ export default function App() {
 
   const spinTimer = useRef<number | null>(null);
   const tickTimer = useRef<number | null>(null);
+  const startSpinRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     let active = true;
@@ -89,7 +100,7 @@ export default function App() {
       return;
     }
 
-    setNumbers((previous) => [...previous, candidate]);
+    setNumbers((previous) => shuffle([...previous, candidate]));
     setWinner(null);
     setInput('');
     setFormError(null);
@@ -156,6 +167,27 @@ export default function App() {
       })();
     }, SPIN_MS);
   };
+
+  startSpinRef.current = startSpin;
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const element = event.target as HTMLElement | null;
+      const tag = element?.tagName;
+
+      // Keep typing/adding with the keyboard untouched.
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || element?.isContentEditable) return;
+      // Let a focused button handle its own Enter/Space activation.
+      if (element?.closest('button')) return;
+      if (event.key !== 'Enter' && event.code !== 'Space') return;
+
+      event.preventDefault();
+      startSpinRef.current();
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   const handleDeleteAll = async () => {
     if (deleting) return;
@@ -336,6 +368,7 @@ export default function App() {
               {numbers.length < 2
                 ? 'ต้องมีหมายเลขอย่างน้อย 2 รายการเพื่อเริ่มหมุน'
                 : `พร้อมหมุน ${numbers.length} หมายเลข · ใช้เวลา ${SPIN_SECONDS} วินาที`}
+              <span className="mt-1 block">กด Enter หรือ Spacebar เพื่อเริ่มหมุน</span>
             </p>
           </div>
 
