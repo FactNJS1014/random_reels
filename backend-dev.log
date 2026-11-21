@@ -11,3 +11,4 @@ Restarting 'src/server.js'
 AOTH GAMES RANDOM API on http://localhost:8080
 Database target: AOTH_GAMES_RANDOM @ localhost:1433
 SQL Server connected, tables verified.
+[API ERROR] Failed to connect to localhost:1433 in 15000ms
